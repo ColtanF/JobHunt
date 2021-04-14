@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+{% block body %}
+    <h1>View Issue</h1>
+    <h2>Title: {{issue.title}}</h2>
+    <h3>Project: {{issue.project}}</h3>
+    <h3>Date Added: {{issue.create_date}}</h3>
+    <h3>Description: </h3>
+    <p>{{issue.description}}</p>
+    <h3>Links:</h3>
+    <p>{{issue.links}}</p>
+{% endblock %}
