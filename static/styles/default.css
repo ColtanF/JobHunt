@@ -5,3 +5,7 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
+table {
+    border: 0.5px solid lightgray;
+}
