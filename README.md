@@ -13,10 +13,10 @@ Essentially, I just wanted an issue tracking app that was a bit more extensive t
 
 ### If I also wanted an app like this, what would I need to do?
 
-Well, if you'd like, you could start by checking out the code from this repo. Besides that, you'll need MySQL, Python (I used v3, but you could probably use V2 if you wanted, with a bit of retooling), pip, and the following Python packages: flask, flask_mysqldb, and wtforms. (Note to self, should probably make a requirements.txt file for pip users). 
+Well, if you'd like, you could start by checking out the code from this repo. Besides that, you'll need MySQL, Python (I used v3, but you could probably use V2 if you wanted, with a bit of retooling), pip, and the following Python packages: flask, flask_mysqldb, mysql-connector-python, and wtforms. (Note to self, should probably make a requirements.txt file for pip users). 
 
-Once you have all of that, you'll need to set up your MySQL installation (if you haven't already) and add a database with the name given in the app.py file with a table called issues_tbl (this is also in app.py, but not as easy to spot as the DB name). You can structure the table however you want, but it needs to at least have the fields in it that match what is used in the SQL commands in app.py and referenced in the html templates. (Another note to self, I should add either a list of SQL commands I used in setting up the DB or a script that does that for the user when setting up the website).
+Once you have all of that, you'll need to set up your MySQL installation (if you haven't already) and add a database with the name given in the app.py file with a table called issues_tbl. You can do this manually if you'd like, but this is now all taken care of by the mysql_db_helper.py file's only function, which creates the database and requisite table automatically. This file's function is called on Flask app startup, but you can comment it out and just run the mysql_db_helper function code on its own as well.
 
-Once your table is created, you will also want to replace the MySQL account/installation info at the top of the app.py file to be able to access the DB from the Flask app.
+You will want to update the MySQL db config info in both the app.py and mysql_db_helper.py files to match your MySQL installation's config.
 
 Once that's finished, all you should have to do is run 'python app.py' from the command line in the directory where the code is checked out.
