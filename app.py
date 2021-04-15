@@ -35,7 +35,7 @@ def issues():
 
     return render_template('issues.html', issues=issues)
 
-class newIssueForm(Form):
+class IssueForm(Form):
     projectName = StringField('Project Name', [validators.Length(min=1, max=100)])
     title = StringField('Title', [validators.Length(min=10, max=200)])
     description = TextAreaField('Description', [validators.Length(min=1)])
@@ -43,7 +43,7 @@ class newIssueForm(Form):
 
 @app.route('/add_issue', methods=["GET", "POST"])
 def add_issue():
-    form = newIssueForm(request.form)
+    form = IssueForm(request.form)
     if request.method == "POST" and form.validate():
         projectName = form.projectName.data
         title = form.title.data
@@ -83,6 +83,40 @@ def view_issue(id):
     cur.close()
 
     return render_template('view_issue.html', issue = issue)
+
+@app.route('/edit_issue/<string:id>', methods=['GET', 'POST'])
+def edit_issue(id):
+    # Retrieve issue from db and throw its info into a form like in the new_issue function
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT * FROM issues_tbl WHERE id = %s", [id])
+    issue = cur.fetchone()
+    cur.close()
+
+    form = IssueForm(request.form)
+    form.projectName.data = issue["projectKey"]
+    form.title.data = issue["title"]
+    form.description.data = issue["description"]
+    form.links.data = issue["links"]
+
+    if request.method == "POST" and form.validate():
+        projectName = request.form["projectName"]
+        title = request.form["title"]
+        description = request.form["description"]
+        links = request.form["links"]
+
+     # Add the issue to the DB
+        cur = mysql.connection.cursor()
+
+        cur.execute("UPDATE issues_tbl SET projectKey = %s, title = %s, description = %s, links = %s WHERE id = %s", (projectName, title, description, links, id))
+
+        mysql.connection.commit()
+        # Close the connection
+        cur.close()
+        flash("Issue updated.", "success")
+        return redirect(url_for('issues'))
+
+    return render_template('edit_issue.html', issue=issue, form=form)
+
 
 if __name__ == "__main__":
     mysql_db_helper.checkAndMakeDB()
