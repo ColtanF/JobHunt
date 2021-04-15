@@ -2,6 +2,7 @@
 from flask import Flask, render_template, request, flash, url_for, redirect
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, validators
+import mysql_db_helper
 
 app = Flask(__name__)
 app.debug = True
@@ -84,5 +85,6 @@ def view_issue(id):
     return render_template('view_issue.html', issue = issue)
 
 if __name__ == "__main__":
+    mysql_db_helper.checkAndMakeDB()
     app.secret_key = "123abc" # Change this to something more secure
     app.run(port=5003)
