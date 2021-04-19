@@ -20,7 +20,15 @@ mysql = MySQL(app)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT * FROM issues_tbl")
+
+    issues = cur.fetchall()
+    if not issues:
+        issues = []
+    cur.close()
+
+    return render_template('index.html', issues=issues)
 
 @app.route('/issues')
 def issues():
