@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+{% block body %}
+    <h3>{{job.position}}</h3>
+    <p>{{job.company}}  -  Date added: {{job.create_date.strftime("%B %d, %Y")}}</p>
+    <p>Location: <a href="https://google.com/maps/search/{{job.address.title()|replace(' ', '+')}}" target="_blank">{{job.address.title()}}</a></p>
+    <p>Salary: {{job.salary}}</p>
+    <hr>
+    <h5>About {{job.company}}: </h5>
+    <p>{{job.companyInfo}}</p>
+    <h5>Position Info: </h5>
+    <p>{{job.positionInfo}}</p>
+    <h5>Requirements I meet: </h5>
+    <p>{{job.reqsIMeet}}</p>
+    <h5>Requirements I don't meet: </h5>
+    <p>{{job.reqsIDontMeet}}</p>
+    <h5>Link(s):</h5>
+    <p><a href="{{job.links}}" target="_blank">{{job.links}}</a></p>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+{% block body %}
+<h1>Jobs</h1>
+<hr>
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Company</th>
+            <th>Position</th>
+            <th>Address</th>
+            <!-- <th>Links</th> -->
+            <th>Status</th>
+            <th>Date Added</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    {% for job in jobs %}
+    <tr>
+        <td>{{job.company}}</td>
+        <td><a href="view_job/{{job.id}}">{{job.position}}</a></td>
+        <td>{{job.address}}</td>
+        <!-- <td><a href="{{job.links}}" target="_blank">{{job.links}}</a></td> -->
+        <td>{{job.status}}</td>
+        <td>{{job.create_date.strftime("%B %d, %Y")}}</td>
+        <td><a href="edit_job/{{job.id}}" class="btn btn-dark float-right">Edit</a></td>
+        <td>
+            <form action="{{url_for('delete_job', id=job.id)}}" method="POST">
+                <input type="hidden" name="_method" value="DELETE">
+                <input aria-label="delete" type="submit" value= "Delete" class="btn btn-danger">
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+    
+</table>
+{% endblock %}

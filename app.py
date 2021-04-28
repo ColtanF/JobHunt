@@ -11,7 +11,7 @@ app.debug = True
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'qwerQWER1234!@#$' # Change this to w/e your db password is
-app.config['MYSQL_DB'] = 'issue_tracker_db'
+app.config['MYSQL_DB'] = 'job_tracker_db'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 # Init MYSQL
@@ -21,112 +21,140 @@ mysql = MySQL(app)
 @app.route('/')
 def index():
     cur = mysql.connection.cursor()
-    result = cur.execute("SELECT * FROM issues_tbl")
+    result = cur.execute("SELECT * FROM jobs_tbl")
 
-    issues = cur.fetchall()
-    if not issues:
-        issues = []
+    jobs = cur.fetchall()
+    if not jobs:
+        jobs = []
     cur.close()
 
-    return render_template('index.html', issues=issues)
+    return render_template('index.html', jobs=jobs)
 
-@app.route('/issues')
-def issues():
-    # Retrieve issues from DB and display them to the user
+@app.route('/jobs')
+def jobs():
+    # Retrieve job postings from DB and display them to the user
     cur = mysql.connection.cursor()
 
-    # Grab all of the issues
-    result = cur.execute("SELECT * FROM issues_tbl")
-    issues = cur.fetchall()
+    # Grab all of the jobs
+    result = cur.execute("SELECT * FROM jobs_tbl")
+    jobs = cur.fetchall()
 
     cur.close()
 
-    return render_template('issues.html', issues=issues)
+    return render_template('jobs.html', jobs=jobs)
 
-class IssueForm(Form):
-    projectName = StringField('Project Name', [validators.Length(min=1, max=100)])
-    title = StringField('Title', [validators.Length(min=10, max=200)])
-    description = TextAreaField('Description', [validators.Length(min=1)])
+
+class JobForm(Form):
+    company = StringField('Company Name', [validators.Length(min=1, max=100)])
+    position = StringField('Position', [validators.Length(min=10, max=200)])
+    companyInfo = TextAreaField('Company Description', [validators.Length(min=1)])
+    positionInfo = TextAreaField('Position Description', [validators.Length(min=1)])
+    reqsIMeet = TextAreaField('Requirements I meet')
+    reqsIDontMeet = TextAreaField('Requirements I don\'t meet')
+    address = StringField('Address', [validators.Length(min=1, max=300)])
     links = TextAreaField('Links')
+    salary = StringField('Salary', [validators.Length(max=200)])
+    status = StringField('Status', [validators.Length(min=1, max=200)])
 
-@app.route('/add_issue', methods=["GET", "POST"])
-def add_issue():
-    form = IssueForm(request.form)
+@app.route('/add_job', methods=["GET", "POST"])
+def add_job():
+    form = JobForm(request.form)
     if request.method == "POST" and form.validate():
-        projectName = form.projectName.data
-        title = form.title.data
-        description = form.description.data
+        company = form.company.data
+        position = form.position.data
+        companyInfo = form.companyInfo.data
+        positionInfo = form.positionInfo.data
+        address = form.address.data
         links = form.links.data
+        status = form.status.data
+        reqsIMeet = form.reqsIMeet.data
+        reqsIDontMeet = form.reqsIDontMeet.data
+        salary = form.salary.data
 
-        # Add the issue to the DB
+        # Add the job to the DB
         cur = mysql.connection.cursor()
 
-        cur.execute("INSERT INTO issues_tbl(projectKey, title, description, links) VALUES(%s, %s, %s, %s)", (projectName, title, description, links))
+        cur.execute("INSERT INTO jobs_tbl(company, position, companyInfo, positionInfo, reqsIMeet, reqsIDontMeet, salary, address, links, status) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", 
+                    (company, position, companyInfo, positionInfo, reqsIMeet, reqsIDontMeet, salary, address, links, status))
 
         mysql.connection.commit()
         # Close the connection
         cur.close()
-        flash("Issue added.", "success")
-        return redirect(url_for("issues"))
+        flash("Job added.", "success")
+        return redirect(url_for("jobs"))
         
-    return render_template('add_issue.html', form=form)
+    return render_template('add_job.html', form=form)
 
-@app.route('/delete_issue/<string:id>', methods=["POST"])
-def delete_issue(id):
-    # Remove the issue from the db
+@app.route('/delete_job/<string:id>', methods=["POST"])
+def delete_job(id):
+    # Remove the job from the db
     cur = mysql.connection.cursor()
-    result = cur.execute("DELETE FROM issues_tbl WHERE id = %s", [id])
+    result = cur.execute("DELETE FROM jobs_tbl WHERE id = %s", [id])
     mysql.connection.commit()
     cur.close()
 
-    flash("Issue deleted.", "success")
-    return redirect(url_for('issues'))
+    flash("Job deleted.", "success")
+    return redirect(url_for('jobs'))
 
-@app.route('/view_issue/<string:id>')
-def view_issue(id):
-    # Retrieve the issue from the db and display its info to the user
+@app.route('/view_job/<string:id>')
+def view_job(id):
+    # Retrieve the job from the db and display its info to the user
     cur = mysql.connection.cursor()
-    result = cur.execute("SELECT * FROM issues_tbl WHERE id = %s", [id])
-    issue = cur.fetchone()
+    result = cur.execute("SELECT * FROM jobs_tbl WHERE id = %s", [id])
+    job = cur.fetchone()
     cur.close()
 
-    return render_template('view_issue.html', issue = issue)
+    return render_template('view_job.html', job = job)
 
-@app.route('/edit_issue/<string:id>', methods=['GET', 'POST'])
-def edit_issue(id):
-    # Retrieve issue from db and throw its info into a form like in the new_issue function
+@app.route('/edit_job/<string:id>', methods=['GET', 'POST'])
+def edit_job(id):
+    # Retrieve job from db and throw its info into a form like in the add_job function
     cur = mysql.connection.cursor()
-    result = cur.execute("SELECT * FROM issues_tbl WHERE id = %s", [id])
-    issue = cur.fetchone()
+    result = cur.execute("SELECT * FROM jobs_tbl WHERE id = %s", [id])
+    job = cur.fetchone()
     cur.close()
 
-    form = IssueForm(request.form)
-    form.projectName.data = issue["projectKey"]
-    form.title.data = issue["title"]
-    form.description.data = issue["description"]
-    form.links.data = issue["links"]
+    form = JobForm(request.form)
+    form.company.data = job["company"]
+    form.position.data = job["position"]
+    form.positionInfo.data = job["positionInfo"]
+    form.reqsIMeet.data = job["reqsIMeet"]
+    form.reqsIDontMeet.data = job["reqsIDontMeet"]
+    form.salary.data = job["salary"]
+    form.address.data = job["address"]
+    form.status.data = job["status"]
+    form.companyInfo.data = job["companyInfo"]
+    form.links.data = job["links"]
 
     if request.method == "POST" and form.validate():
-        projectName = request.form["projectName"]
-        title = request.form["title"]
-        description = request.form["description"]
+        company = request.form["company"]
+        position = request.form["position"]
+        positionInfo = request.form["positionInfo"]
+        companyInfo = request.form["companyInfo"]
+        reqsIMeet = request.form["reqsIMeet"]
+        reqsIDontMeet = request.form["reqsIDontMeet"]
+        salary = request.form["salary"]
+        address = request.form["address"]
+        status = request.form["status"]
         links = request.form["links"]
 
-     # Add the issue to the DB
+
+     # Add the job to the DB
         cur = mysql.connection.cursor()
 
-        cur.execute("UPDATE issues_tbl SET projectKey = %s, title = %s, description = %s, links = %s WHERE id = %s", (projectName, title, description, links, id))
+        cur.execute("UPDATE jobs_tbl SET company = %s, position = %s, companyInfo = %s, positionInfo = %s, reqsIMeet = %s, reqsIDontMeet = %s, salary = %s, address = %s, links = %s, status = %s WHERE id = %s", 
+                    (company, position, companyInfo, positionInfo, reqsIMeet, reqsIDontMeet, salary, address, links, status, id))
 
         mysql.connection.commit()
         # Close the connection
         cur.close()
-        flash("Issue updated.", "success")
-        return redirect(url_for('issues'))
+        flash("Job updated.", "success")
+        return redirect(url_for('jobs'))
 
-    return render_template('edit_issue.html', issue=issue, form=form)
+    return render_template('edit_job.html', job=job, form=form)
 
 
 if __name__ == "__main__":
     mysql_db_helper.checkAndMakeDB()
     app.secret_key = "123abc" # Change this to something more secure
-    app.run(port=5003)
+    app.run(port=5004)

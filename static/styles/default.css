@@ -7,5 +7,33 @@ a:hover {
 }
 
 table {
-    border: 0.5px solid lightgray;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+    max-width: 100%;
+    table-layout: fixed;
+}
+body {
+    background-color: rgb(238, 238, 238);
+}
+.container {
+    border-radius: 5px;
+    border: 1px solid lightgray;
+    padding: 30px;
+    background-color: white;
+}
+label {
+    padding-bottom: 5px;
+}
+
+
+.dash-table {
+    table-layout: auto;
+}
+
+
+.details {
+    min-height: 160px;
+}
+.form-group {
+    padding-top: 10px;
 }

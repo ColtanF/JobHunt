@@ -12,18 +12,24 @@
 import mysql.connector
 
 dbs = {}
-dbs['issue_tracker_db'] = (
-    "CREATE DATABASE issue_tracker_db2;"
+dbs['job_tracker_db'] = (
+    "CREATE DATABASE job_tracker_db;"
 )
 
 tables = {}
-tables['issues_tbl'] = (
-    "CREATE TABLE issues_tbl(" +
+tables['jobs_tbl'] = (
+    "CREATE TABLE jobs_tbl(" +
     "  id INT(11) AUTO_INCREMENT PRIMARY KEY," +
-    "  projectKey VARCHAR(100)," +
-    "  title VARCHAR(200)," +
-    "  description TEXT," +
+    "  company VARCHAR(100)," +
+    "  position VARCHAR(200)," +
+    "  companyInfo TEXT," + 
+    "  positionInfo TEXT," + 
+    "  reqsIMeet TEXT," + 
+    "  reqsIDontMeet TEXT," + 
+    "  salary varchar(200)," + 
+    "  address VARCHAR(200)," +
     "  links TEXT," +
+    "  status VARCHAR(200)," + 
     "  create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
 )
 def checkAndMakeDB():
@@ -46,7 +52,7 @@ def checkAndMakeDB():
         
     # If I ever used more than one DB for some reason, would need to update
     #  hard coded values here and in the for loop below...
-    db_cursor.execute("SHOW TABLES in issue_tracker_db;")
+    db_cursor.execute("SHOW TABLES in job_tracker_db;")
 
     dbTables = [item[0] for item in db_cursor.fetchall()]
 
@@ -55,7 +61,7 @@ def checkAndMakeDB():
             print("Found " + key + "!")
         else:
             print(key + " not found. Creating table...")
-            db_cursor.execute("USE issue_tracker_db;")
+            db_cursor.execute("USE job_tracker_db;")
             db_cursor.execute(tables[key])
 
     db_cursor.close()

@@ -2,36 +2,36 @@
 {% block body %}
 <div class="row row-cols-md-2 mb-3 g-5">
     <div class="col">
-        <h2>Welcome to FITS</h2>
+        <h2>Welcome to JobHunt</h2>
         <br>
-        <h3>Go to the <a href="/issues">Issues page</a> or <a href="/add_issue">Add a new issue</a>.</h3>
+        <h3>Go to the <a href="/jobs">Jobs page</a> or <a href="/add_job">Add a new job</a>.</h3>
     </div>
     <div class="col">
         <div class="mb-4 rounded-3 shadow-sm border-dark">
-            <div class="card-header text-white bg-dark text-center">Open issues: {{issues|length}}</div>
-            <table class="table table-hover">
+            <div class="card-header text-white bg-dark text-center">Job postings: {{jobs|length}}</div>
+            <table class="table table-hover dash-table">
                 <thead class="table-dark">
                     <tr>
-                        <th>Top Issues:</th>
+                        <th>Top jobs:</th>
                         <th></th>
                     </tr>
                 </thead>
-                {% if issues|length < 5 %}
-                    {% for issue in issues %}
+                {% if jobs|length == 0 %}
+                <tr>
+                    <td style="column-span:2;">No open jobs.</td>
+                </tr>
+                {% elif jobs|length < 5 %}
+                    {% for job in jobs %}
                     <tr>
-                        <td>{{issue.projectKey}}</td>
-                        <td><a href="view_issue/{{issues[i].id}}">{{issues[i].title}}</a></td>
+                        <td>{{job.company}}</td>
+                        <td><a href="view_job/{{job.id}}">{{job.position}}</a></td>
                     </tr>
                     {% endfor %}
-                {% elif issues|length == 0 %}
-                    <tr>
-                        <td style="column-span:2;">No open issues.</td>
-                    </tr>
                 {% else %}
                     {% for i in range(5) %}
                     <tr>
-                        <td>{{issues[i].projectKey}}</td>
-                        <td><a href="view_issue/{{issues[i].id}}">{{issues[i].title}}</a></td>
+                        <td>{{jobs[i].company}}</td>
+                        <td><a href="view_job/{{jobs[i].id}}">{{jobs[i].position}}</a></td>
                     </tr>
                    {% endfor %}
                 {% endif %}
