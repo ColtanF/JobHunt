@@ -96,13 +96,27 @@ def delete_job(id):
     flash("Job deleted.", "success")
     return redirect(url_for('jobs'))
 
-@app.route('/view_job/<string:id>')
+@app.route('/view_job/<string:id>', methods=['GET', 'POST'])
 def view_job(id):
     # Retrieve the job from the db and display its info to the user
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT * FROM jobs_tbl WHERE id = %s", [id])
     job = cur.fetchone()
     cur.close()
+    if request.method == "POST": 
+        # rating must have been updated. Update the rating in the db
+        ratingsForm = request.form
+        if ratingsForm['stars']:
+            cur = mysql.connection.cursor()
+            result = cur.execute("UPDATE jobs_tbl SET rating = %s WHERE id = %s", [ratingsForm['stars'], id])
+            mysql.connection.commit()
+            result = cur.execute("SELECT * FROM jobs_tbl WHERE id = %s", [id])
+            job = cur.fetchone()
+            cur.close()
+            flash("Rating updated.", "success")
+
+        return render_template('view_job.html', job=job)
+
 
     return render_template('view_job.html', job = job)
 

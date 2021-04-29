@@ -37,3 +37,34 @@ label {
 .form-group {
     padding-top: 10px;
 }
+
+/* ratings  */
+.stars > input { 
+    display: none
+}
+.stars {
+    float: left;
+}
+.star {
+    color: black;
+    transition: 0.3ms all;
+}
+.stars > label {
+    float: right;
+    color: black;
+}
+.star:hover {
+    color: #f1c40f;
+}
+.stars > input:checked ~ label,
+.stars:not(:checked) > label:hover,
+.stars:not(:checked) > label:hover ~ label {
+    color: #f1c40f;
+}
+
+.stars > input:checked + label:hover,
+.stars > input:checked ~ label:hover,
+.stars > label:hover ~ input:checked ~ label,
+.stars > input:checked ~ label:hover ~ label {
+    color: #f6e58d;
+}

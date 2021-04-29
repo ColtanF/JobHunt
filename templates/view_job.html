@@ -4,6 +4,19 @@
     <p>{{job.company}}  -  Date added: {{job.create_date.strftime("%B %d, %Y")}}</p>
     <p>Location: <a href="https://google.com/maps/search/{{job.address.title()|replace(' ', '+')}}" target="_blank">{{job.address.title()}}</a></p>
     <p>Salary: {{job.salary}}</p>
+    <p>
+        Rating: 
+        <form name="rating" class="stars" method="POST">
+            {% for i in range(5) %}
+                {% if i+1 == job.rating %}
+                <input id="star{{i+1}}" type="radio" name="stars" class="star{{i+1}}" value={{i+1}} checked="checked" onclick="submitRatings()"></input><label class="star" for="star{{i+1}}"><ion-icon name="star"></ion-icon></label>
+                {% else %}
+                <input id="star{{i+1}}" type="radio" name="stars" class="star{{i+1}}" value={{i+1}} onclick="submitRatings()"></input><label class="star" for="star{{i+1}}"><ion-icon name="star"></ion-icon></label>
+                {% endif %}
+            {% endfor %}
+         </form>
+    </p>
+    <br>
     <hr>
     <h5>About {{job.company}}: </h5>
     <p>{{job.companyInfo}}</p>
