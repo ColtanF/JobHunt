@@ -23,7 +23,9 @@ def index():
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT * FROM jobs_tbl")
 
-    jobs = cur.fetchall()
+    jobs = list(cur.fetchall())
+    jobs.sort(key=lambda x: x['rating'])
+
     if not jobs:
         jobs = []
     cur.close()
@@ -70,11 +72,12 @@ def add_job():
         reqsIMeet = form.reqsIMeet.data
         reqsIDontMeet = form.reqsIDontMeet.data
         salary = form.salary.data
+        rating = 0
 
         # Add the job to the DB
         cur = mysql.connection.cursor()
 
-        cur.execute("INSERT INTO jobs_tbl(company, position, companyInfo, positionInfo, reqsIMeet, reqsIDontMeet, salary, address, links, status) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", 
+        cur.execute("INSERT INTO jobs_tbl(company, position, companyInfo, positionInfo, reqsIMeet, reqsIDontMeet, salary, address, links, status, rating) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 0)", 
                     (company, position, companyInfo, positionInfo, reqsIMeet, reqsIDontMeet, salary, address, links, status))
 
         mysql.connection.commit()

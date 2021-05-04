@@ -19,13 +19,13 @@
     <br>
     <hr>
     <h5>About {{job.company}}: </h5>
-    <p>{{job.companyInfo}}</p>
+    <p>{{job.companyInfo|safe}}</p>
     <h5>Position Info: </h5>
-    <p>{{job.positionInfo}}</p>
+    <p>{{job.positionInfo|safe}}</p>
     <h5>Requirements I meet: </h5>
-    <p>{{job.reqsIMeet}}</p>
+    <p>{{job.reqsIMeet|safe}}</p>
     <h5>Requirements I don't meet: </h5>
-    <p>{{job.reqsIDontMeet}}</p>
+    <p>{{job.reqsIDontMeet|safe}}</p>
     <h5>Link(s):</h5>
     <p><a href="{{job.links}}" target="_blank">{{job.links}}</a></p>
 {% endblock %}
