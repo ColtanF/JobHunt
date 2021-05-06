@@ -1,15 +1,13 @@
-# FITS
-## The (Coltan) Franke Issue Tracking System
+# JobHunt
+## A simple job posting tracking site
 
-FITS is a software development project issue tracking system created using Flask, Bootstrap (for now), and MySQL. Fits is an issue tracking web site similar to other like JIRA, VersionOne, etc. 
+JobHunt is a job posting tracking system created using Flask, Bootstrap (for now), and MySQL. JobHunt can be used to track job postings that a user is interested in across all sorts of different job listing websites (Indeed, LinkedIn, etc).
 
-### Why does this exist when other apps like JIRA and VersionOne exist? Even GitHub lets you track issues on projects.
+### Most engineers just use an Excel spreadsheet. Why not do that?
 
-Great question. Essentially, I have a bunch of side projects, and I wanted to be able to locally track issues/planned improvements across all of my side projects.
+Great question. Originally, when I built FITS (an issue tracking Flask app), I was also tracking job postings I came across across the job posting sites on a Google Sheets spreadsheet, and it worked OK, but I felt that I could use the FITS infrastructure to build a nicer looking job tracker. My spreadsheet had a bunch of columns, and some of them had a lot of text in them, and it looked messy. It got to the point where some jobs had several lines of text (think 5-10 lines) in some columns, I was having to scroll, I was losing my place sometimes, it was messy to edit, etc.
 
-I wanted to build something from scratch, on my own, and I wanted to practice developing with Flask and MySQL. Beyond that, I wanted a tool specifically for me to host locally on my machine while I developed projects. I wanted something simple, with no licenses or extensive installation processes, a tool without a ton of features that I didn't need. I also wanted the ability to view all of the issues across all of my side projects, all in one place.
-
-Essentially, I just wanted an issue tracking app that was a bit more extensive than a todo list app, so I built one. 
+To sum it up, I used to use a spreadsheet, it got messy, I already had the infrastructure for something cleaner, so I built something cleaner.
 
 ### If I also wanted an app like this, what would I need to do?
 
@@ -27,4 +25,4 @@ Once that's finished, run the following from the command line:
 ```
 python app.py
 ```
-And your site will be live! With the default settings in app.py, you can access your site at localhost:5003. 
+And your site will be live! With the default settings in app.py, you can access your site at localhost:5004. 
