@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% block body %}
+    <a href="{{url_for('edit_job', id=job.id)}}" class="btn btn-dark float-right">Edit</a>
     <h3>{{job.position}}</h3>
     <p>{{job.company}}  -  Date added: {{job.create_date.strftime("%B %d, %Y")}}</p>
     <p>Location: <a href="https://google.com/maps/search/{{job.address.title()|replace(' ', '+')}}" target="_blank">{{job.address.title()}}</a></p>

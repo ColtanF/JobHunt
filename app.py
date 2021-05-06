@@ -161,12 +161,16 @@ def edit_job(id):
 
         cur.execute("UPDATE jobs_tbl SET company = %s, position = %s, companyInfo = %s, positionInfo = %s, reqsIMeet = %s, reqsIDontMeet = %s, salary = %s, address = %s, links = %s, status = %s WHERE id = %s", 
                     (company, position, companyInfo, positionInfo, reqsIMeet, reqsIDontMeet, salary, address, links, status, id))
-
         mysql.connection.commit()
+        
+        # Grab the updated job
+        result = cur.execute("SELECT * FROM jobs_tbl WHERE id = %s", [id])
+        job = cur.fetchone()
+
         # Close the connection
         cur.close()
         flash("Job updated.", "success")
-        return redirect(url_for('jobs'))
+        return render_template('view_job.html', job=job)
 
     return render_template('edit_job.html', job=job, form=form)
 
