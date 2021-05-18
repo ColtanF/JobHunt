@@ -4,8 +4,13 @@
     <div class="col">
         <h2>Welcome to JobHunt</h2>
         <br>
+        {% if session.logged_in %}
         <h3>Go to the <a href="/jobs">Jobs page</a> or <a href="/add_job">Add a new job</a>.</h3>
+        {% else %}
+        <h3><a href="/login">Login</a> to view your saved jobs, or <a href="/register">Register</a> to get started.</h3>
+        {% endif %}
     </div>
+    {% if session.logged_in %}
     <div class="col">
         <div class="mb-4 rounded-3 shadow-sm border-dark">
             <div class="card-header text-white bg-dark text-center">Job postings: {{jobs|length}}</div>
@@ -38,5 +43,6 @@
             </table>
         </div>
     </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -30,8 +30,20 @@ tables['jobs_tbl'] = (
     "  address VARCHAR(200)," +
     "  links TEXT," +
     "  status VARCHAR(200)," + 
+    "  rating INT," + 
+    "  username VARCHAR(30)," + 
     "  create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
 )
+tables['users'] = (
+    "CREATE TABLE users(" + 
+    "  id INT(11) AUTO_INCREMENT PRIMARY KEY," +
+    "  name VARCHAR(100)," +
+    "  email VARCHAR(100)," +
+    "  username VARCHAR(30)," +
+    "  password VARCHAR(100)," + 
+    "  register_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
+)
+
 def checkAndMakeDB():
     db_connection = mysql.connector.connect(
         host="localhost", # replace with wherever you host your db

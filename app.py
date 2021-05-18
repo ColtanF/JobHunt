@@ -1,8 +1,10 @@
 #! python
-from flask import Flask, render_template, request, flash, url_for, redirect
+from flask import Flask, render_template, request, flash, url_for, redirect, session
 from flask_mysqldb import MySQL
-from wtforms import Form, StringField, TextAreaField, validators
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators
+from passlib.hash import sha256_crypt
 import mysql_db_helper
+from functools import wraps
 
 app = Flask(__name__)
 app.debug = True
@@ -17,28 +19,40 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 # Init MYSQL
 mysql = MySQL(app)
 
+# Check if user logged in
+def isLoggedIn(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            flash('Unauthorized, Please log in uto continue.', 'danger')
+            return redirect(url_for('login'))
+    return wrap
 
 @app.route('/')
 def index():
-    cur = mysql.connection.cursor()
-    result = cur.execute("SELECT * FROM jobs_tbl")
+    jobs = []
+    if 'logged_in' in session:
+        cur = mysql.connection.cursor()
+        result = cur.execute("SELECT * FROM jobs_tbl WHERE username = %s", [session["username"]])
 
-    jobs = list(cur.fetchall())
-    jobs.sort(key=lambda x: x['rating'])
+        jobs = list(cur.fetchall())
+        jobs.sort(key=lambda x: x['rating'])
 
-    if not jobs:
-        jobs = []
-    cur.close()
-
+        if not jobs:
+            jobs = []
+        cur.close()
     return render_template('index.html', jobs=jobs)
 
 @app.route('/jobs')
+@isLoggedIn
 def jobs():
     # Retrieve job postings from DB and display them to the user
     cur = mysql.connection.cursor()
 
     # Grab all of the jobs
-    result = cur.execute("SELECT * FROM jobs_tbl")
+    result = cur.execute("SELECT * FROM jobs_tbl WHERE username = %s", [session["username"]])
     jobs = cur.fetchall()
 
     cur.close()
@@ -59,6 +73,7 @@ class JobForm(Form):
     status = StringField('Status', [validators.Length(min=1, max=200)])
 
 @app.route('/add_job', methods=["GET", "POST"])
+@isLoggedIn
 def add_job():
     form = JobForm(request.form)
     if request.method == "POST" and form.validate():
@@ -72,13 +87,12 @@ def add_job():
         reqsIMeet = form.reqsIMeet.data
         reqsIDontMeet = form.reqsIDontMeet.data
         salary = form.salary.data
-        rating = 0
 
         # Add the job to the DB
         cur = mysql.connection.cursor()
 
-        cur.execute("INSERT INTO jobs_tbl(company, position, companyInfo, positionInfo, reqsIMeet, reqsIDontMeet, salary, address, links, status, rating) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 0)", 
-                    (company, position, companyInfo, positionInfo, reqsIMeet, reqsIDontMeet, salary, address, links, status))
+        cur.execute("INSERT INTO jobs_tbl(company, position, companyInfo, positionInfo, reqsIMeet, reqsIDontMeet, salary, address, links, status, username, rating) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 0)", 
+                    (company, position, companyInfo, positionInfo, reqsIMeet, reqsIDontMeet, salary, address, links, status, session["username"]))
 
         mysql.connection.commit()
         # Close the connection
@@ -89,6 +103,7 @@ def add_job():
     return render_template('add_job.html', form=form)
 
 @app.route('/delete_job/<string:id>', methods=["POST"])
+@isLoggedIn
 def delete_job(id):
     # Remove the job from the db
     cur = mysql.connection.cursor()
@@ -100,6 +115,7 @@ def delete_job(id):
     return redirect(url_for('jobs'))
 
 @app.route('/view_job/<string:id>', methods=['GET', 'POST'])
+@isLoggedIn
 def view_job(id):
     # Retrieve the job from the db and display its info to the user
     cur = mysql.connection.cursor()
@@ -124,6 +140,7 @@ def view_job(id):
     return render_template('view_job.html', job = job)
 
 @app.route('/edit_job/<string:id>', methods=['GET', 'POST'])
+@isLoggedIn
 def edit_job(id):
     # Retrieve job from db and throw its info into a form like in the add_job function
     cur = mysql.connection.cursor()
@@ -174,6 +191,95 @@ def edit_job(id):
 
     return render_template('edit_job.html', job=job, form=form)
 
+class RegisterForm(Form):
+    name = StringField('Name', [validators.Length(min=1, max=50)])
+    username = StringField('Username', [validators.Length(min=4, max=25)])
+    email = StringField('Email', [validators.Length(min=6, max=50)])
+    password = PasswordField('Password', [
+        validators.DataRequired(),
+        validators.EqualTo('confirm', message='Passwords do not match')
+    ])
+    confirm = PasswordField('Confirm Password')
+
+@app.route('/register', methods = ["POST", "GET"])
+def register():
+    form = RegisterForm(request.form)
+    if request.method == "POST" and form.validate():
+        name = form.name.data
+        email = form.email.data
+        username = form.username.data
+        password = sha256_crypt.encrypt(str(form.password.data))
+
+        # Need to add user to database
+        # Create cursor
+        cur = mysql.connection.cursor()
+        # First, check if the username is already taken
+        cur.execute("SELECT * FROM users WHERE username = %s", [username])
+        mysql.connection.commit()
+        data = cur.fetchall()
+        if len(data) != 0:
+            flash("Account with username " + username + " already exists, please choose a different username.", "warning")
+            return render_template('register.html', form=form)
+
+        # If the username is unique, add it to the database
+        cur.execute("INSERT INTO users(name,email,username,password) VALUES(%s, %s, %s, %s)", (name, email, username, password))
+
+        # Commit to db
+        mysql.connection.commit()
+
+        cur.close()
+        flash("You are now registered and can login.", 'success')
+
+        return redirect(url_for('index'))
+    return render_template('register.html', form=form)
+
+@app.route('/login', methods=["POST", "GET"])
+def login():
+    if request.method == "POST":
+        # get the fields from the page
+        username = request.form["username"]
+        password_candidate = request.form["password"]
+
+        # DB Stuff
+        # Create cursor
+        cur = mysql.connection.cursor()
+
+        # Check for username
+        result = cur.execute("SELECT * FROM users WHERE username = %s", [username])
+
+        if result > 0:
+            # Get stored hash
+            data = cur.fetchone()
+            password = data['password']
+            cur.close()
+
+            # Compare the passwords
+            if sha256_crypt.verify(password_candidate, password):
+                app.logger.info("PASSWORD MATCHED!")
+                session['logged_in'] = True
+                session['username'] = username
+
+                flash('You are now logged in.', 'success')
+                return redirect(url_for('index'))
+            else:
+                print("I am here")
+                error = "Invalid password."
+                app.logger.info(error)
+                return render_template('login.html', error=error)
+        else: 
+            # invalid username
+            error = "Invalid username."
+            app.logger.info(error)
+            return render_template('login.html', error=error)
+
+    return render_template("login.html")
+
+@app.route('/logout')
+@isLoggedIn
+def logout():
+    session.clear()
+    flash("You are now logged out.", "success")
+    return redirect(url_for('login'))
 
 if __name__ == "__main__":
     mysql_db_helper.checkAndMakeDB()
