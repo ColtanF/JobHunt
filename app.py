@@ -26,7 +26,7 @@ def isLoggedIn(f):
         if 'logged_in' in session:
             return f(*args, **kwargs)
         else:
-            flash('Unauthorized, Please log in uto continue.', 'danger')
+            flash('Unauthorized, Please log in to continue.', 'danger')
             return redirect(url_for('login'))
     return wrap
 
@@ -187,7 +187,7 @@ def edit_job(id):
         # Close the connection
         cur.close()
         flash("Job updated.", "success")
-        return render_template('view_job.html', job=job)
+        return redirect(url_for("view_job", id=id))
 
     return render_template('edit_job.html', job=job, form=form)
 
